@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import './App.css';
 import styled from 'styled-components'
+import { createBrowserHistory } from 'history';
 
 const AppContext = createContext();
 
@@ -45,11 +46,16 @@ const AppProvider = ({ children }) => {
     }
   }
 
-  const effector = (action = {}, state) => {
+  const effector = (action = {}, state, registry) => {
     switch (action.type) {
       case 'DEBUG':
         console.log('DEBUG: ', action, { state });
         break;
+
+      case 'CHANGE_LOCATION':
+        registry.history.push(action.location);
+        break;
+        
       default:
     }
   };
@@ -62,9 +68,20 @@ const AppProvider = ({ children }) => {
     _dispatch(action);
   }
 
+  const [registry, setRegistry] = useState({ dispatch });
+
   useEffect(() => {
-    effector(lastAction, state);
-  }, [lastAction, state]);
+    const history = createBrowserHistory();
+    const unlisten = history.listen((location, action) => {
+      registry.dispatch({ type: 'RESOLVE_LOCATION', location });
+    });
+    setRegistry(registry => ({ ...registry, history }));
+    return unlisten;
+  }, []);
+
+  useEffect(() => {
+    effector(lastAction, state, registry);
+  }, [lastAction, state, registry]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
@@ -97,15 +114,16 @@ const ContentForm = () => {
 }
 
 function getFilteredContent(state) {
-  const letters = state.letters.split('');
+  const letters = state.letters;
   const symbol = state.symbol;
+  const content = state.content;
 
-  return useMemo(
-    () => state.content
+  return useMemo(() => {
+    const letterList = letters.split('');
+    return content
       .split('')
-      .map(letter => letters.includes(letter) ? symbol : letter),
-    [letters, symbol]
-  );
+      .map(letter => letterList.includes(letter) ? symbol : letter);
+  }, [letters, symbol, content]);
 }
 
 const Preview = () => {
@@ -116,6 +134,19 @@ const Preview = () => {
     <div>
       {content}
     </div>
+  );
+}
+
+const Link = ({ children, href, ...rest }) => {
+  const { dispatch } = useContext(AppContext);
+  
+  const handleClick = event => {
+    event.preventDefault();
+    dispatch({ type: 'CHANGE_LOCATION', location: href });
+  }
+
+  return (
+    <a href={href} onClick={handleClick} {...rest}>{children}</a>
   );
 }
 
@@ -139,6 +170,9 @@ const ConfigForm = () => {
         </label>
       </form>
       <button onClick={() => dispatch({ type: 'DEBUG', payload: 'testing, testing' })}>debug</button>
+      <div>
+        <Link href="/test">test</Link> | <Link href="/">home</Link>
+      </div>
     </>
   );
 }
