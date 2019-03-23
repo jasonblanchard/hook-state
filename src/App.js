@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useState,
   memo,
+  useCallback,
 } from 'react';
 import './App.css';
 import styled from 'styled-components'
@@ -166,10 +167,10 @@ const PreviewEdge = () => {
 const Link = ({ children, href, ...rest }) => {
   const { dispatch } = useContext(AppContext);
   
-  const handleClick = event => {
+  const handleClick = useCallback(event => {
     event.preventDefault();
     dispatch({ type: 'CHANGE_LOCATION', location: href });
-  }
+  }, [href, dispatch]);
 
   return (
     <a href={href} onClick={handleClick} {...rest}>{children}</a>
