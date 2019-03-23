@@ -98,11 +98,11 @@ const AppProvider = ({ children }) => {
   useEffect(() => {
     const history = createBrowserHistory();
     const unlisten = history.listen((location, action) => {
-      registry.dispatch({ type: 'RESOLVE_LOCATION', location });
+      dispatch({ type: 'RESOLVE_LOCATION', location });
     });
     setRegistry(registry => ({ ...registry, history }));
     return unlisten;
-  }, [registry]);
+  }, [dispatch]);
 
   useEffect(() => {
     effector(lastAction, state, registry);
