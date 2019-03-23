@@ -13,52 +13,53 @@ import { createBrowserHistory } from 'history';
 
 const AppContext = createContext();
 
+const reducer = (state = {}, action) => {
+  // console.log(action); 
+
+  switch (action.type) {
+    case 'CHANGE_CONTENT':
+      return {
+        ...state,
+        ...{ content: action.value }
+      };
+
+    case 'CHANGE_LETTERS':
+      return {
+        ...state,
+        ...{ letters: action.value }
+      };
+
+    case 'CHANGE_SYMBOL':
+      return {
+        ...state,
+        ...{ symbol: action.value }
+      };
+
+    default:
+      return state;
+  }
+}
+
+const effector = (action = {}, state, registry) => {
+  switch (action.type) {
+    case 'DEBUG':
+      console.log('DEBUG: ', action, { state });
+      break;
+
+    case 'CHANGE_LOCATION':
+      registry.history.push(action.location);
+      break;
+      
+    default:
+  }
+};
+
 const AppProvider = ({ children }) => {
   const initialState = {
     letters: 'a',
     content: '',
     symbol: '🍕'
   }
-  const reducer = (state = {}, action) => {
-    // console.log(action); 
-
-    switch (action.type) {
-      case 'CHANGE_CONTENT':
-        return {
-          ...state,
-          ...{ content: action.value }
-        };
-
-      case 'CHANGE_LETTERS':
-        return {
-          ...state,
-          ...{ letters: action.value }
-        };
-
-      case 'CHANGE_SYMBOL':
-        return {
-          ...state,
-          ...{ symbol: action.value }
-        };
-
-      default:
-        return state;
-    }
-  }
-
-  const effector = (action = {}, state, registry) => {
-    switch (action.type) {
-      case 'DEBUG':
-        console.log('DEBUG: ', action, { state });
-        break;
-
-      case 'CHANGE_LOCATION':
-        registry.history.push(action.location);
-        break;
-        
-      default:
-    }
-  };
   
   const [lastAction, setLastAction] = useState();
 
