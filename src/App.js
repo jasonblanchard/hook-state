@@ -54,6 +54,21 @@ const effector = (action = {}, state, registry) => {
   }
 };
 
+const selectors = {
+  getFilteredContent(state) {
+    const letters = state.letters;
+    const symbol = state.symbol;
+    const content = state.content;
+  
+    return useMemo(() => {
+      const letterList = letters.split('');
+      return content
+        .split('')
+        .map(letter => letterList.includes(letter) ? symbol : letter);
+    }, [letters, symbol, content]);
+  },
+}
+
 const AppProvider = ({ children }) => {
   const initialState = {
     letters: 'a',
@@ -114,22 +129,9 @@ const ContentForm = () => {
   );
 }
 
-function getFilteredContent(state) {
-  const letters = state.letters;
-  const symbol = state.symbol;
-  const content = state.content;
-
-  return useMemo(() => {
-    const letterList = letters.split('');
-    return content
-      .split('')
-      .map(letter => letterList.includes(letter) ? symbol : letter);
-  }, [letters, symbol, content]);
-}
-
 const Preview = () => {
   const { state } = useContext(AppContext);
-  const content = getFilteredContent(state);
+  const content = selectors.getFilteredContent(state);
 
   return (
     <div>
