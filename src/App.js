@@ -81,6 +81,7 @@ const AppProvider = ({ children }) => {
   const [lastAction, setLastAction] = useState();
   const [state, _dispatch] = useReducer(reducer, initialState);
   const [dispatch, setDispatch] = useState(() => {});
+  const [registry, setRegistry] = useState();
   
   // Set up dispatch like this to keep its identity consistent.
   useEffect(() => {
@@ -91,9 +92,8 @@ const AppProvider = ({ children }) => {
 
     // Use function notation to prevent the setter from invoking the function.
     setDispatch(() => dispatch);
+    setRegistry(registry => ({ ...registry, dispatch }));
   }, []);
-
-  const [registry, setRegistry] = useState({ dispatch });
 
   useEffect(() => {
     const history = createBrowserHistory();
@@ -102,7 +102,7 @@ const AppProvider = ({ children }) => {
     });
     setRegistry(registry => ({ ...registry, history }));
     return unlisten;
-  }, []);
+  }, [registry]);
 
   useEffect(() => {
     effector(lastAction, state, registry);
